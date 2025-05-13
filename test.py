@@ -20,14 +20,15 @@ import logging
 
 """_summary_
 
-python test.py --model '/data/Block0_skip_model_110.pth.tar' --csv './dataset/test.csv' --outfile '/data/out.tiff'
+python test.py --model '/data/Block0_skip_model_110.pth.tar' --csv './dataset/test.csv' --out '/data/out'
 
 Returns:
-    _type_: _description_
+    _Metrics 
 """
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
+
     logging.info("Starting the main function.")
     model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
 
@@ -51,7 +52,6 @@ def main():
 
         model = define_model(is_resnet=False, is_densenet=False, is_senet=True)
         
-        # Load the model checkpoint onto the CPU
         state_dict = torch.load(x, map_location=torch.device('cpu'))['state_dict']
         model.load_state_dict(state_dict, strict=False)
         logging.info("Model state_dict loaded successfully.")
@@ -66,6 +66,15 @@ def main():
 
 
 def test(test_loader, model, args, writer):
+    """Test the model on the test set
+    This function evaluates the model on the test set.
+
+    Args:
+        test_loader (_type_): _description_
+        model (_type_): _description_
+        args (_type_): _description_
+        writer (_type_): _description_
+    """
     logging.info("Starting the test function.")
     losses = AverageMeter()
     model.eval()
@@ -106,13 +115,13 @@ def test(test_loader, model, args, writer):
         writer.add_scalar("Metrics/MAE", averageError['MAE'], i)
         writer.add_scalar("Metrics/SSIM", averageError['SSIM'], i)
 
-        output_np = output.squeeze().cpu().detach().numpy() 
+        # Dead code of saving output
+        # output_np = output.squeeze().cpu().detach().numpy() 
         # output_file = os.path.join(args.out, f"output_batch_{i + 1}.tif")
         # logging.info(f"Saving output to {output_file}")
         # output_image = Image.fromarray(output_np.astype(np.uint16)) 
         # output_image.save(output_file)
-        
-        logging.info(f"Output saved successfully.")
+        # logging.info(f"Output saved to {output_file}")
         
     averageError['RMSE'] = np.sqrt(averageError['MSE'])
     loss = float((losses.avg).data.cpu().numpy())
@@ -130,6 +139,15 @@ def test(test_loader, model, args, writer):
                                       ssim=averageError['SSIM']))
     
 def testing_loss(depth, output, losses, batchSize):
+    """Compute the testing loss
+    This function computes the testing loss based on the depth and output images. It is currently using the Sobel gradient.
+
+    Args:
+        depth (mat): Ground truth depth images.
+        output (tensor): Predicted depth images.
+        losses (AverageMeter): Object to track loss values.
+        batchSize (int): Number of samples in the batch.
+    """
     logging.info("Calculating testing loss.")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     ones = torch.ones(depth.size(0), 1, depth.size(2), depth.size(3)).float().to(device)
@@ -154,6 +172,17 @@ def testing_loss(depth, output, losses, batchSize):
 
 
 def define_model(is_resnet, is_densenet, is_senet):
+    """Define the model based on the specified architecture.
+
+    Args:
+        is_resnet (bool): ResNet model flag
+        is_densenet (bool): DenseNet model flag
+        is_senet (bool): SENet model flag
+
+    Returns:
+        model: The defined model based on the specified architecture.
+    """
+    
     logging.info(f"Defining model: is_resnet={is_resnet}, is_densenet={is_densenet}, is_senet={is_senet}")
     if is_resnet:
         original_model = resnet.resnet50(pretrained=True)
