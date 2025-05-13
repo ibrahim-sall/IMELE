@@ -8,10 +8,10 @@ RUN apt-get update && apt-get install -y --quiet --no-install-recommends \
     gcc
 
 # for opencv
-RUN apt-get install -y libgl1-mesa-dev
+RUN apt-get install -y libgl1-mesa-dev libtiff-dev
 
 RUN pip install -q --upgrade pip
-RUN pip install -r requirements.txt -q
+RUN pip install -r requirements.txt --progress-bar=on
 
 WORKDIR /work
 EXPOSE 8888

@@ -2,7 +2,7 @@
 import torch
 import math
 import numpy as np
-from ssim import pytorch_ssim
+from torchmetrics.image.ssim import StructuralSimilarityIndexMeasure
 from PIL import Image
 import cv2
 import torch
@@ -96,7 +96,7 @@ def evaluateError(output, target, idx, batches):
 
         errors['MSE'] = torch.sum(torch.pow(diffMatrix, 2)) / IMsize / batches
         errors['MAE'] = torch.sum(diffMatrix) / IMsize / batches
-        ssim_loss = pytorch_ssim.SSIM(window_size = 15)
+        ssim_loss = StructuralSimilarityIndexMeasure(data_range=1.0)
         errors['SSIM'] = ssim_loss(_output,_target)
        
        
@@ -142,11 +142,11 @@ def feature_plot(feats,w,h):
         
     
     return feats
-  
 
 
 
 
 
 
-	
+
+

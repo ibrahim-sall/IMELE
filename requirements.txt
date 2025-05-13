@@ -4,4 +4,7 @@ opencv-contrib-python==4.5.2.54
 pandas==1.2.4
 scipy==1.6.3
 scikit-image==0.18.1
-tensorboard_logger==0.1.0
+torch==1.7.1
+torchmetrics==0.7.0
+tensorboard==2.5.0
+protobuf==3.20.3

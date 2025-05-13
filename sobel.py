@@ -19,9 +19,12 @@ class Sobel(nn.Module):
     def forward(self, x):
         out = self.edge_conv(x) 
         out = out.contiguous().view(-1, 2, x.size(2), x.size(3))
-        # x = out[1,:]
-        # save_image(x[0], 'img1.png')
-        # save_image(x[1], 'img2.png')
+        if out.size(0) > 1:
+            x = out[1, :]
+            save_image(x[0], '/data/out/img1.png')
+            save_image(x[1], '/data/out/img2.png')
+        else:
+            print("Warning: 'out' has only one channel. Skipping save_image.")
         #i1 = x[0].cpu().detach().numpy()
         #i2 = x[1].cpu().detach().numpy()
 

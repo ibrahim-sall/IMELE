@@ -6,6 +6,7 @@ from PIL import Image
 import random
 from nyu_transform import *
 import cv2
+import logging
 
 
 class depthDataset(Dataset):
@@ -14,6 +15,7 @@ class depthDataset(Dataset):
     def __init__(self, csv_file, transform=None):
         self.frame = pd.read_csv(csv_file, header=None)
         self.transform = transform
+        Image.MAX_IMAGE_PIXELS = 100000000
 
 
     def __getitem__(self, idx):
@@ -22,10 +24,23 @@ class depthDataset(Dataset):
         
 
 
-        depth = cv2.imread(depth_name,-1); depth = (depth*1000).astype(np.uint16)
-        #depth  = cv2.cvtColor(depth  , cv2.COLOR_BGR2GRAY)
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"Loading depth image from: {depth_name}")
+        depth = cv2.imread(depth_name, -1)
+        if depth is None:
+            logger.error(f"Failed to load depth image from {depth_name}")
+        else:
+            logger.info(f"Depth image loaded successfully with shape: {depth.shape}")
+        depth = (depth * 1000).astype(np.uint16)
         depth = Image.fromarray(depth)
+
+        logger.info(f"Loading RGB image from: {image_name}")
         image = Image.open(image_name)
+        if image is None:
+            logger.error(f"Failed to load RGB image from {image_name}")
+        else:
+            logger.info(f"RGB image loaded successfully with size: {image.size}")
 
         sample = {'image': image, 'depth': depth}
 
